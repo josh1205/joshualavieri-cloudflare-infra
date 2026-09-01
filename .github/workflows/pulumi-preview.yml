@@ -1,0 +1,55 @@
+# Runs `pulumi preview` on every pull request — when it opens, and again on each
+# commit pushed to it (that is what `synchronize` means).
+#
+# SECURITY, because this repository is public:
+#
+#   * The trigger is `pull_request`, never `pull_request_target`.
+#     `pull_request_target` runs the base branch's workflow WITH secrets against
+#     the pull request's code, which on a public repo lets anyone exfiltrate the
+#     Cloudflare and Pulumi tokens by opening a PR. There is no safe way to use
+#     it here.
+#   * GitHub withholds secrets from fork pull requests by design, so this job
+#     skips them rather than failing with a confusing auth error.
+#   * The token used here is READ-ONLY. Preview needs no write access. The
+#     write-scoped token lives only in the `production` environment used by
+#     pulumi-up.yml.
+
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# One run per PR. A new commit cancels the previous, still-running preview.
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    # Forks get no secrets. Skip instead of failing.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - uses: pulumi/actions@8582a9e8cc630786854029b4e09281acd6794b58 # v6
+        with:
+          command: preview
+          stack-name: prd
+          comment-on-pr: true
+          diff: true
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_READ_TOKEN }}

@@ -1,0 +1,5 @@
+config:
+  joshualavieri-cloudflare-infra:accountId:
+    secure: AAABAKjpdCR1XA8WHcNuPPosDNZh70mfxjpy9F6lKF3XFvUF9xk08wKwhLZwE9qEXnZQIDgRrVpzzUy9Nka4yw==
+  joshualavieri-cloudflare-infra:zoneId:
+    secure: AAABADIp8uMVka8w7aEdNMudvZQP0OtRcXAtOCfjYelrTJ6HQfkRWmzV4K5qsOdNPgDag/gmewbaK+Ew7pzMOw==

@@ -1,0 +1,13 @@
+{
+  "name": "joshualavieri-cloudflare-infra",
+  "private": true,
+  "description": "Pulumi program managing the joshualavieri.com Cloudflare zone",
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@pulumi/cloudflare": "6.20.0",
+    "@pulumi/pulumi": "^3.260.0"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+bin/
+*.tsbuildinfo
+
+# Credentials — never commit these
+.env
+.env.*
+*.token
+cloudflare-token*

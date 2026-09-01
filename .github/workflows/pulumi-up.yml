@@ -1,0 +1,49 @@
+# Runs `pulumi up` when a pull request merges to master.
+#
+# This is the ONLY place a write-scoped Cloudflare token is used. It is stored
+# on the `production` GitHub Environment, not on the repository, so no other
+# workflow — including one added in a pull request — can reach it.
+#
+# REQUIRED REPO CONFIGURATION:
+#   Settings -> Environments -> production
+#     * Required reviewers      -> a human approves before anything applies
+#     * Deployment branches     -> master only, so no other branch can claim
+#                                  this environment and its write token
+
+name: Pulumi Up
+
+on:
+  push:
+    branches: [master]
+
+# Never let two applies touch the same stack at once. Not cancel-in-progress:
+# interrupting an apply mid-flight leaves state and reality disagreeing.
+concurrency:
+  group: apply-prd
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - uses: pulumi/actions@8582a9e8cc630786854029b4e09281acd6794b58 # v6
+        with:
+          command: up
+          stack-name: prd
+          refresh: false
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_WRITE_TOKEN }}
