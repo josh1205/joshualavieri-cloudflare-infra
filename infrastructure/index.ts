@@ -11,12 +11,12 @@
 
 import { zoneAndSettings } from './resources/zone-settings'
 import { dnsCnames } from './resources/dns-cname'
-// import { dnsMail } from './resources/dns-mail'
+import { dnsMail } from './resources/dns-mail'
 import { bulkRedirects } from './resources/bulk-redirects'
 
 const { zone, ssl, alwaysHttps, minTls } = zoneAndSettings()
 const { apex, www } = dnsCnames()
-// const { spf, dmarc } = dnsMail()
+const { spf, dmarc } = dnsMail()
 const { list, ruleset } = bulkRedirects()
 
 export const zoneName = zone.name
