@@ -41,13 +41,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: infrastructure/package-lock.json
 
       - run: npm ci --ignore-scripts
+        working-directory: infrastructure
 
       - uses: pulumi/actions@8582a9e8cc630786854029b4e09281acd6794b58 # v6
         with:
           command: preview
           stack-name: prd
+          work-dir: infrastructure
           comment-on-pr: true
           diff: true
         env:

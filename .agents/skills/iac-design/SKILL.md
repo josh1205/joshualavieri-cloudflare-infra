@@ -128,6 +128,16 @@ infrastructure, and preview needs no write access — so the entire program can 
 built, refactored and verified before any credential capable of changing
 anything is introduced. Swap to a write-scoped token only to apply.
 
+## The program may not be at the repo root
+
+If the Pulumi program lives in a subdirectory, three things must point at it or
+CI fails in ways that look like auth errors: the action's `work-dir`, the
+install step's `working-directory`, and `setup-node`'s `cache-dependency-path`.
+
+Moving the program is otherwise safe — URNs are built from logical names, not
+file paths, so state is unaffected. Only the *selected stack* is lost, because
+selection is keyed to the workspace path. `pulumi stack select` restores it.
+
 ## Order of operations
 
 1. Scan the provider's API and record what exists — IDs, and every field value.

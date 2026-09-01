@@ -7,20 +7,23 @@ This repo owns the *domain*. It does not own the *applications* that sit on it.
 ## What's in here
 
 ```
-index.ts                     composition only — calls one function per resource file
-config.ts                    every parameterised value; the only place literals live
-resources/
-  zone-settings.ts           the zone + ssl / always_use_https / min_tls_version
-  dns-cname.ts               apex and www CNAMEs pointing at Pages
-  dns-mail.ts                SPF and DMARC
-  bulk-redirects.ts          redirect list + account ruleset (see caveat below)
+infrastructure/              the Pulumi program — run every pulumi command here
+  index.ts                   composition only — calls one function per resource file
+  config.ts                  every parameterised value; the only place literals live
+  Pulumi.yaml                project definition
+  Pulumi.prd.yaml            stack config — encrypted accountId and zoneId
+  resources/
+    zone-settings.ts         the zone + ssl / always_use_https / min_tls_version
+    dns-cname.ts             apex and www CNAMEs pointing at Pages
+    dns-mail.ts              SPF and DMARC
+    bulk-redirects.ts        redirect list + account ruleset (see caveat below)
+.github/workflows/           preview on PRs, apply on merge to master
 .agents/skills/iac-design/   how to change this safely; .claude/skills symlinks to it
-Pulumi.yaml                  project definition
-Pulumi.prd.yaml              stack config — encrypted accountId and zoneId
 ```
 
-Each file in `resources/` exports exactly one function, called once from
-`index.ts`.
+Each file in `infrastructure/resources/` exports exactly one function, called
+once from `index.ts`.
+
 ## What this manages
 
 | Resource | Name | State |
@@ -56,7 +59,10 @@ what another system already owns declaratively.*
 
 ## Prerequisites
 
+Every pulumi command runs from `infrastructure/`, not the repo root.
+
 ```bash
+cd infrastructure
 npm install
 pulumi login          # Pulumi Cloud — free for individuals
 pulumi stack select prd
@@ -71,6 +77,7 @@ export CLOUDFLARE_API_TOKEN="...not my token"
 ## Usage
 
 ```bash
+cd infrastructure
 pulumi preview        # always, first
 pulumi up             # only after reading the preview
 pulumi refresh        # reconcile state with reality
